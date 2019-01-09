@@ -1,2 +1,0 @@
-package nomore.delay.gifparser
-
