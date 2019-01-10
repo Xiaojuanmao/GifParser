@@ -10,10 +10,6 @@ package nomore.delay.gifparser.model.ext
  */
 class GraphicControlExtension : ExtensionBlock() {
 
-    companion object {
-        const val LABEL = 0xF9
-    }
-
     var blockSize: Byte = 4 // 块大小，固定值4 8 bit
 
     var reservedFlag: Byte = 0 // 保留位，3 bit

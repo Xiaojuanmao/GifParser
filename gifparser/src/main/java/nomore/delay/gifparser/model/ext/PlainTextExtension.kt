@@ -22,10 +22,6 @@ package nomore.delay.gifparser.model.ext
  */
 class PlainTextExtension : ExtensionBlock() {
 
-    companion object {
-        const val LABEL = 0x01
-    }
-
     var blockSize: Byte = 12 // 在扩展中的字节数，从Block Size字段后开始知道但是不包括data部分的开始。这个域值为12, 8 bit
     var textLeftPosition: Int = 0 // 文字距离屏幕左侧边距, 单位为像素 16 bit
     var textTopPosition: Int = 0 // 文字距离屏幕顶部边距, 单位为像素, 16 bit

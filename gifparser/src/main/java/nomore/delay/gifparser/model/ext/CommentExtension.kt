@@ -13,10 +13,6 @@ package nomore.delay.gifparser.model.ext
 
 class CommentExtension : ExtensionBlock() {
 
-    companion object {
-        const val LABEL = 0xFE
-    }
-
     var data: ByteArray? = null // 最多255字节，最少1字节，在数据前面有1个字节的大小信息
 
 }
