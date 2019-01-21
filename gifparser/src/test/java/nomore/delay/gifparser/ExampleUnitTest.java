@@ -19,6 +19,6 @@ public class ExampleUnitTest {
     public void testGifHeader() {
         GifParser gifParser = new GifParser();
         gifParser.init("src/test/java/nomore/delay/gifparser/demo_gif.gif");
-        gifParser.parseHeader();
+        gifParser.parse();
     }
 }
