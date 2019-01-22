@@ -1,5 +1,7 @@
 package nomore.delay.gifparser
 
+import nomore.delay.gifparser.model.DataBlock
+import nomore.delay.gifparser.model.GifFrame
 import nomore.delay.gifparser.model.GifHeader
 import nomore.delay.gifparser.model.GifLogicScreenDescriptor
 import nomore.delay.gifparser.model.ext.ApplicationExtension
@@ -37,6 +39,12 @@ class GifParser {
         private const val MASK_GRAPHIC_CONTROL_DISPOSABLE_METHOD: Int = 0b00011100 // 图形控制扩展标识处理方式
         private const val MASK_GRAPHIC_CONTROL_USER_INPUT: Int = 0b00000010 // 图形控制扩展标识用户输入
         private const val MASK_GRAPHIC_CONTROL_TRANSPARENT: Int = 0b00000001 // 图形控制扩展标识透明度索引
+
+        private const val MASK_GIF_FRAME_HAS_LOCAL_COLOR_TABLE: Int = 0b10000000 // 是否有局部颜色表
+        private const val MASK_GIF_FRAME_INTERFACE_FLAG: Int = 0b01000000 // 是否为隔行扫描
+        private const val MASK_GIF_FRAME_LOCAL_COLOR_TABLE_SORT_FLAG: Int = 0b00100000 // 局部颜色表是否被排序
+        private const val MASK_GIF_FRAME_PERSERVED: Int = 0b00010000 // 保留位
+        private const val MASK_GIF_FRAME_LOCAL_COLOR_TABLE_SIZE: Int = 0b00001111 // 局部颜色表大小
     }
 
     private val gifHeader by lazy { GifHeader() }
@@ -147,7 +155,7 @@ class GifParser {
                 }
 
                 LABEL_GIF_FRAME -> {
-                    print("\ngif frame")
+                    parseGifFrames()
                 }
 
                 LABEL_TRAILER -> {
@@ -206,6 +214,53 @@ class GifParser {
         print(applicationExt.toString())
     }
 
+    private fun parseGifFrames() {
+        val gifFrame = GifFrame()
+        gifFrame.translationX = rawData?.short.nullOr(0)
+        gifFrame.translationY = rawData?.short.nullOr(0)
+        gifFrame.frameWidth = rawData?.short.nullOr(0)
+        gifFrame.frameHeight = rawData?.short.nullOr(0)
+
+        val multiParams = rawData?.get()?.toInt()
+        gifFrame.hasLocalColorTable = multiParams?.and(MASK_GIF_FRAME_HAS_LOCAL_COLOR_TABLE) == 1
+        gifFrame.interfaceFlag = multiParams?.and(MASK_GIF_FRAME_INTERFACE_FLAG) == 1
+        gifFrame.sortFlag = multiParams?.and(MASK_GIF_FRAME_LOCAL_COLOR_TABLE_SORT_FLAG) == 1
+        gifFrame.preserved = multiParams?.and(MASK_GIF_FRAME_PERSERVED) == 1
+        gifFrame.localColorTableSize = multiParams?.and(MASK_GIF_FRAME_LOCAL_COLOR_TABLE_SIZE).nullOr(0)
+
+        // local color table
+        if (gifFrame.hasLocalColorTable) {
+            val tableSize = (3 * (gifFrame.localColorTableSize + 1).toFloat().pow(2)).toInt()
+            gifFrame.localColorTable = ByteArray(tableSize)
+            rawData?.get(gifFrame.localColorTable)
+        }
+
+        gifFrame.lzwInitSize = rawData?.get().nullOr(0)
+
+        val frameBlockList = mutableListOf<DataBlock>()
+        while (true) {
+            val blockSize = rawData?.get()
+            if (blockSize == null || blockSize.toInt() == 0) {
+                // ext结束
+                gifFrame.blockTerminator = 0
+                break
+            } else {
+                // read one frame data block
+                val dataBlock = DataBlock()
+                dataBlock.blockSize = byteToInt(blockSize)
+                val byteArray = ByteArray(dataBlock.blockSize)
+                rawData?.get(byteArray)
+                dataBlock.datas = byteArray
+                frameBlockList.add(dataBlock)
+            }
+        }
+
+        gifFrame.dataBlocks = frameBlockList
+
+        print(gifFrame)
+
+    }
+
 
     private fun checkData() {
         if (rawData == null) {
@@ -234,6 +289,10 @@ class GifParser {
             val newPosition = Math.min(rawData?.position().nullOr(0) + blockSize, rawData?.limit().nullOr(0))
             rawData?.position(newPosition)
         } while (blockSize > 0)
+    }
+
+    private fun byteToInt(byte: Byte): Int {
+        return java.lang.Byte.toUnsignedInt(byte)
     }
 
 

@@ -5,7 +5,7 @@ package nomore.delay.gifparser.model
  */
 class DataBlock {
 
-    var blockSize: Byte = 0 // 块大小，最大为255字节
-    var datas: ByteArray? = null // 数据本身
+    var blockSize: Int = 0 // 块大小, 1 byte
+    var datas: ByteArray? = null // 数据本身，最大为255字节
 
 }

@@ -23,6 +23,18 @@ fun ByteArray?.toHexString(): String? {
     return stringBuilder.toString()
 }
 
+fun Byte?.toHexString(): String? {
+    this ?: return null
+    val value = this.toInt() and 0xFF
+    val hexValue = Integer.toHexString(value)
+    val stringBuilder = StringBuilder("")
+    if (hexValue.length < 2) {
+        stringBuilder.append(0)
+    }
+    stringBuilder.append(hexValue)
+    return stringBuilder.toString()
+}
+
 fun <T> T?.nullOr(default: T): T {
     return this ?: default
 }

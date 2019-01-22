@@ -13,6 +13,8 @@ public class ExampleUnitTest {
     @Test
     public void addition_isCorrect() {
         assertEquals(4, 2 + 2);
+        Byte b = Byte.valueOf("0xec", 16);
+        System.out.println(Byte.toUnsignedInt(b));
     }
 
     @Test
