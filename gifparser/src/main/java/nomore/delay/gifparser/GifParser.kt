@@ -6,6 +6,7 @@ import nomore.delay.gifparser.model.GifHeader
 import nomore.delay.gifparser.model.GifLogicScreenDescriptor
 import nomore.delay.gifparser.model.ext.ApplicationExtension
 import nomore.delay.gifparser.model.ext.GraphicControlExtension
+import nomore.delay.gifparser.model.ext.PlainTextExtension
 import java.io.*
 import java.lang.IllegalArgumentException
 import java.nio.ByteBuffer
@@ -93,8 +94,8 @@ class GifParser {
     fun parseLSD() {
         checkData()
 
-        lsd.widthInPx = rawData?.short.nullOr(0)
-        lsd.heightInPx = rawData?.short.nullOr(0)
+        lsd.widthInPx = readShort()
+        lsd.heightInPx = readShort()
 
         val multiParams = rawData?.get()?.toInt()
         lsd.hasGlobalColorTable = multiParams?.and(MASK_GLOBAL_COLOR_TABLE) == 1
@@ -140,16 +141,14 @@ class GifParser {
 
                         LABEL_EXT_COMMENT -> {
                             print("\nskip comment extension")
-                            skip()
                         }
 
                         LABEL_EXT_PLAIN_TEXT -> {
-                            print("\nskip plain text")
-                            skip()
+                            parsePlainText()
                         }
 
                         else -> {
-                            skip()
+                            print("\nskip unknown extension")
                         }
                     }
                 }
@@ -167,7 +166,6 @@ class GifParser {
                     // empty
                 }
                 else -> {
-
                 }
             }
         }
@@ -184,9 +182,9 @@ class GifParser {
         graphicControlExtension.transparentFlag = multiParams?.and(MASK_GRAPHIC_CONTROL_TRANSPARENT) == 1
 
         graphicControlExtension.delayTime = rawData?.short?.toInt().nullOr(0)
-        graphicControlExtension.transparentColorIndex = rawData?.get()?.toInt().nullOr(0)
+        graphicControlExtension.transparentColorIndex = readByte()
 
-        graphicControlExtension.blockTerminator = rawData?.get()?.toInt().nullOr(0)
+        graphicControlExtension.blockTerminator = readByte()
 
         print(graphicControlExtension.toString())
     }
@@ -216,10 +214,10 @@ class GifParser {
 
     private fun parseGifFrames() {
         val gifFrame = GifFrame()
-        gifFrame.translationX = rawData?.short.nullOr(0)
-        gifFrame.translationY = rawData?.short.nullOr(0)
-        gifFrame.frameWidth = rawData?.short.nullOr(0)
-        gifFrame.frameHeight = rawData?.short.nullOr(0)
+        gifFrame.translationX = readShort()
+        gifFrame.translationY = readShort()
+        gifFrame.frameWidth = readShort()
+        gifFrame.frameHeight = readShort()
 
         val multiParams = rawData?.get()?.toInt()
         gifFrame.hasLocalColorTable = multiParams?.and(MASK_GIF_FRAME_HAS_LOCAL_COLOR_TABLE) == 1
@@ -234,15 +232,36 @@ class GifParser {
             gifFrame.localColorTable = ByteArray(tableSize)
             rawData?.get(gifFrame.localColorTable)
         }
-
         gifFrame.lzwInitSize = rawData?.get().nullOr(0)
+        gifFrame.dataBlocks = readDataBlocks()
 
+        print(gifFrame)
+    }
+
+    private fun parsePlainText() {
+        val plainTextExtension = PlainTextExtension()
+        plainTextExtension.blockSize = readByte()
+        plainTextExtension.textLeftPosition = readShort()
+        plainTextExtension.textTopPosition = readShort()
+        plainTextExtension.textWidth = readShort()
+        plainTextExtension.textHeight = readShort()
+        plainTextExtension.characterWidth = readByte()
+        plainTextExtension.characterHeight = readByte()
+        plainTextExtension.textForegroundColorIndex = readByte()
+        plainTextExtension.textBackgroundColorIndex = readByte()
+
+        plainTextExtension.textBlocks = readDataBlocks()
+
+        print(plainTextExtension)
+
+    }
+
+    private fun readDataBlocks(): List<DataBlock>? {
         val frameBlockList = mutableListOf<DataBlock>()
         while (true) {
             val blockSize = rawData?.get()
             if (blockSize == null || blockSize.toInt() == 0) {
                 // ext结束
-                gifFrame.blockTerminator = 0
                 break
             } else {
                 // read one frame data block
@@ -254,13 +273,8 @@ class GifParser {
                 frameBlockList.add(dataBlock)
             }
         }
-
-        gifFrame.dataBlocks = frameBlockList
-
-        print(gifFrame)
-
+        return frameBlockList
     }
-
 
     private fun checkData() {
         if (rawData == null) {
@@ -285,10 +299,18 @@ class GifParser {
     private fun skip() {
         var blockSize: Int
         do {
-            blockSize = rawData?.get()?.toInt().nullOr(0)
+            blockSize = readByte()
             val newPosition = Math.min(rawData?.position().nullOr(0) + blockSize, rawData?.limit().nullOr(0))
             rawData?.position(newPosition)
         } while (blockSize > 0)
+    }
+
+    private fun readByte(): Int {
+        return rawData?.get()?.toInt().nullOr(0)
+    }
+
+    private fun readShort(): Short {
+        return rawData?.short.nullOr(0)
     }
 
     private fun byteToInt(byte: Byte): Int {

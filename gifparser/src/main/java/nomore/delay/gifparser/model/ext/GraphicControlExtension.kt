@@ -37,14 +37,16 @@ class GraphicControlExtension : ExtensionBlock() {
     }
 
     override fun toString(): String {
-        return "\nparse graphic control extension\n" +
-                "label : $label\n" +
-                "reservedFlag : $reservedFlag\n" +
-                "disposalMethod : $disposalMethod\n" +
-                "userInputFlag : $userInputFlag\n" +
-                "transparentFlag : $transparentFlag\n" +
-                "delayTime : $delayTime\n" +
-                "transparentColorIndex : $transparentColorIndex\n"
+        return "\nGraphicControlExtension(" +
+                "blockSize=$blockSize," +
+                "reservedFlag=$reservedFlag," +
+                "disposalMethod=$disposalMethod," +
+                "userInputFlag=$userInputFlag," +
+                "transparentFlag=$transparentFlag," +
+                "delayTime=$delayTime," +
+                "transparentColorIndex=$transparentColorIndex" +
+                ")\n"
     }
+
 
 }

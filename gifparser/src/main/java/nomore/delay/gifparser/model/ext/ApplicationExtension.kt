@@ -1,6 +1,6 @@
 package nomore.delay.gifparser.model.ext
 
-import nomore.delay.gifparser.toStrings
+import java.util.*
 
 class ApplicationExtension : ExtensionBlock() {
 
@@ -14,11 +14,12 @@ class ApplicationExtension : ExtensionBlock() {
     }
 
     override fun toString(): String {
-        return "\nparse application extension: \n" +
-                "blockSize: $blockSize\n" +
-                "identifier: ${identifier.toStrings()}\n" +
-                "authenticationCode: ${authenticationCode.toStrings()}\n" +
-                "identifierCode: $identifierCode\n"
+        return "\nApplicationExtension(" +
+                "blockSize=$blockSize," +
+                "identifier=${Arrays.toString(identifier)}," +
+                "authenticationCode=${Arrays.toString(authenticationCode)}," +
+                "identifierCode=${Arrays.toString(identifierCode)}" +
+                ")\n"
     }
 
 }

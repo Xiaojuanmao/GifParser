@@ -1,5 +1,8 @@
 package nomore.delay.gifparser.model.ext
 
+import nomore.delay.gifparser.model.DataBlock
+import nomore.delay.gifparser.nullOr
+
 /**
  * 89a 版本加入
  *
@@ -22,14 +25,36 @@ package nomore.delay.gifparser.model.ext
  */
 class PlainTextExtension : ExtensionBlock() {
 
-    var blockSize: Byte = 12 // 在扩展中的字节数，从Block Size字段后开始知道但是不包括data部分的开始。这个域值为12, 8 bit
-    var textLeftPosition: Int = 0 // 文字距离屏幕左侧边距, 单位为像素 16 bit
-    var textTopPosition: Int = 0 // 文字距离屏幕顶部边距, 单位为像素, 16 bit
-    var textWidth: Int = 0 // 文本框宽度, 16 bit
-    var textHeight: Int = 0 // 文本框高度, 16 bit
-    var characterWidth: Byte = 0 // 字符宽度, 8 bit
-    var characterHeight: Byte = 0 // 字符高度, 8 bit
-    var textForegroundColorIndex: Byte = 0 // 文字前景色在全局颜色表的索引，8 bit
-    var textBackgroundColorIndex: Byte = 0 // 文字背景色在全局颜色表的索引，8 bit
-    var textContent: ByteArray? = null // 文字内容, 最多为255，最少为1，在每个子块之前有一个字节标记块的大小
+    var blockSize: Int = 0x0c // 在扩展中的字节数，从Block Size字段后开始知道但是不包括data部分的开始。这个域值为12, 8 bit
+    var textLeftPosition: Short = 0 // 文字距离屏幕左侧边距, 单位为像素 16 bit
+    var textTopPosition: Short = 0 // 文字距离屏幕顶部边距, 单位为像素, 16 bit
+    var textWidth: Short = 0 // 文本框宽度, 16 bit
+    var textHeight: Short = 0 // 文本框高度, 16 bit
+    var characterWidth: Int = 0 // 字符宽度, 8 bit
+    var characterHeight: Int = 0 // 字符高度, 8 bit
+    var textForegroundColorIndex: Int = 0 // 文字前景色在全局颜色表的索引，8 bit
+    var textBackgroundColorIndex: Int = 0 // 文字背景色在全局颜色表的索引，8 bit
+
+    var textBlocks: List<DataBlock>? = null // 文字内容, 最多为255，最少为1，在每个子块之前有一个字节标记块的大小
+
+    init {
+        label = 0x01
+    }
+
+    override fun toString(): String {
+        return "\nPlainTextExtension(" +
+                "blockSize=$blockSize," +
+                "textLeftPosition=$textLeftPosition," +
+                "textTopPosition=$textTopPosition," +
+                "textWidth=$textWidth," +
+                "textHeight=$textHeight," +
+                "characterWidth=$characterWidth," +
+                "characterHeight=$characterHeight," +
+                "textForegroundColorIndex=$textForegroundColorIndex," +
+                "textBackgroundColorIndex=$textBackgroundColorIndex," +
+                "textBlocksSize=${textBlocks?.size.nullOr(0)}," +
+                ")\n"
+    }
+
+
 }

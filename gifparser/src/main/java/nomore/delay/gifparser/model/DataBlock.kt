@@ -1,7 +1,8 @@
 package nomore.delay.gifparser.model
 
+
 /**
- * Gif图每一帧的数据块
+ * 数据块
  */
 class DataBlock {
 

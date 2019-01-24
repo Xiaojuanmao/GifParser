@@ -1,6 +1,7 @@
 package nomore.delay.gifparser.model
 
 import nomore.delay.gifparser.toHexString
+import java.util.*
 
 class GifLogicScreenDescriptor {
 
@@ -16,16 +17,18 @@ class GifLogicScreenDescriptor {
     var globalColorTable: ByteArray? = null // 整个全局颜色表，大小为3的整数倍，RGB排列
 
     override fun toString(): String {
-        return "\nparse lsd\n" +
-                "width in px : $widthInPx\n" +
-                "height in px: $heightInPx\n" +
-                "hasGlobalColorTable: $hasGlobalColorTable\n" +
-                "colorResolution: $colorResolution\n" +
-                "sortFlag: $sortFlag\n" +
-                "globalColorTableSizeInByte: $globalColorTableSizeInByte\n" +
-                "backgroundColorIndex: $backgroundColorIndex\n" +
-                "pixelAspectRatio: $pixelAspectRatio\n" +
-                "globalColorTable: ${globalColorTable.toHexString()}\n"
+        return "\nGifLogicScreenDescriptor(" +
+                "widthInPx=$widthInPx," +
+                "heightInPx=$heightInPx," +
+                "hasGlobalColorTable=$hasGlobalColorTable," +
+                "colorResolution=$colorResolution," +
+                "sortFlag=$sortFlag," +
+                "globalColorTableSizeInByte=$globalColorTableSizeInByte," +
+                "backgroundColorIndex=$backgroundColorIndex," +
+                "pixelAspectRatio=$pixelAspectRatio," +
+                "globalColorTable=${Arrays.toString(globalColorTable)}" +
+                ")\n"
     }
+
 
 }
