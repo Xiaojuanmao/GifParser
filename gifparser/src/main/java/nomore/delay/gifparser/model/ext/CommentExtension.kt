@@ -1,5 +1,8 @@
 package nomore.delay.gifparser.model.ext
 
+import nomore.delay.gifparser.model.DataBlock
+import nomore.delay.gifparser.nullOr
+
 /**
  * 89a 版本加入
  *
@@ -13,6 +16,17 @@ package nomore.delay.gifparser.model.ext
 
 class CommentExtension : ExtensionBlock() {
 
-    var data: ByteArray? = null // 最多255字节，最少1字节，在数据前面有1个字节的大小信息
+    var commentBlock: List<DataBlock>? = null // 最多255字节，最少1字节，在数据前面有1个字节的大小信息
+
+    init {
+        label = 0xfe
+    }
+
+    override fun toString(): String {
+        return "\nCommentExtension(" +
+                "commentBlockSize=${commentBlock?.size.nullOr(0)}" +
+                ")\n"
+    }
+
 
 }

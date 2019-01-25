@@ -26,10 +26,10 @@ import nomore.delay.gifparser.nullOr
 class PlainTextExtension : ExtensionBlock() {
 
     var blockSize: Int = 0x0c // 在扩展中的字节数，从Block Size字段后开始知道但是不包括data部分的开始。这个域值为12, 8 bit
-    var textLeftPosition: Short = 0 // 文字距离屏幕左侧边距, 单位为像素 16 bit
-    var textTopPosition: Short = 0 // 文字距离屏幕顶部边距, 单位为像素, 16 bit
-    var textWidth: Short = 0 // 文本框宽度, 16 bit
-    var textHeight: Short = 0 // 文本框高度, 16 bit
+    var textLeftPosition: Int = 0 // 文字距离屏幕左侧边距, 单位为像素 16 bit
+    var textTopPosition: Int = 0 // 文字距离屏幕顶部边距, 单位为像素, 16 bit
+    var textWidth: Int = 0 // 文本框宽度, 16 bit
+    var textHeight: Int = 0 // 文本框高度, 16 bit
     var characterWidth: Int = 0 // 字符宽度, 8 bit
     var characterHeight: Int = 0 // 字符高度, 8 bit
     var textForegroundColorIndex: Int = 0 // 文字前景色在全局颜色表的索引，8 bit

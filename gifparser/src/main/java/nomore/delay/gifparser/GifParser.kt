@@ -5,6 +5,7 @@ import nomore.delay.gifparser.model.GifFrame
 import nomore.delay.gifparser.model.GifHeader
 import nomore.delay.gifparser.model.GifLogicScreenDescriptor
 import nomore.delay.gifparser.model.ext.ApplicationExtension
+import nomore.delay.gifparser.model.ext.CommentExtension
 import nomore.delay.gifparser.model.ext.GraphicControlExtension
 import nomore.delay.gifparser.model.ext.PlainTextExtension
 import java.io.*
@@ -140,15 +141,15 @@ class GifParser {
                         }
 
                         LABEL_EXT_COMMENT -> {
-                            print("\nskip comment extension")
+                            parseCommentExt()
                         }
 
                         LABEL_EXT_PLAIN_TEXT -> {
-                            parsePlainText()
+                            parsePlainTextExt()
                         }
 
                         else -> {
-                            print("\nskip unknown extension")
+//                            print("\nskip unknown extension")
                         }
                     }
                 }
@@ -162,8 +163,7 @@ class GifParser {
                     done = true
                 }
                 LABEL_EMPTY -> {
-                    print("\nempty label")
-                    // empty
+//                    print("\nempty label")
                 }
                 else -> {
                 }
@@ -212,6 +212,13 @@ class GifParser {
         print(applicationExt.toString())
     }
 
+    private fun parseCommentExt() {
+        val commentExtension = CommentExtension()
+        commentExtension.commentBlock = readDataBlocks()
+
+        print(commentExtension)
+    }
+
     private fun parseGifFrames() {
         val gifFrame = GifFrame()
         gifFrame.translationX = readShort()
@@ -238,7 +245,7 @@ class GifParser {
         print(gifFrame)
     }
 
-    private fun parsePlainText() {
+    private fun parsePlainTextExt() {
         val plainTextExtension = PlainTextExtension()
         plainTextExtension.blockSize = readByte()
         plainTextExtension.textLeftPosition = readShort()
@@ -306,16 +313,19 @@ class GifParser {
     }
 
     private fun readByte(): Int {
-        return rawData?.get()?.toInt().nullOr(0)
+        return byteToInt(rawData?.get().nullOr(0))
     }
 
-    private fun readShort(): Short {
-        return rawData?.short.nullOr(0)
+    private fun readShort(): Int {
+        return shortToInt(rawData?.short.nullOr(0))
     }
 
     private fun byteToInt(byte: Byte): Int {
         return java.lang.Byte.toUnsignedInt(byte)
     }
 
+    private fun shortToInt(short: Short): Int {
+        return java.lang.Short.toUnsignedInt(short)
+    }
 
 }

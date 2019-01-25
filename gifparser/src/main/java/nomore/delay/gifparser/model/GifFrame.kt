@@ -6,10 +6,10 @@ import java.util.*
 class GifFrame {
 
     var frameSeparator: Int= 0x2C // 图像标识符以',' 值为0x2C 开头 8 bit
-    var translationX: Short = 0 // X方向偏移量 16 bit
-    var translationY: Short = 0 // Y方向偏移量 16 bit
-    var frameWidth: Short = 0 // 帧宽 16 bit
-    var frameHeight: Short = 0 // 帧高 16 bit
+    var translationX: Int = 0 // X方向偏移量 16 bit
+    var translationY: Int = 0 // Y方向偏移量 16 bit
+    var frameWidth: Int = 0 // 帧宽 16 bit
+    var frameHeight: Int = 0 // 帧高 16 bit
 
     var hasLocalColorTable: Boolean = false // 是否有局部颜色表 1 bit
     var interfaceFlag: Boolean = false // 图像是否为隔行扫描，图像以四遍交错模式交织 1 bit

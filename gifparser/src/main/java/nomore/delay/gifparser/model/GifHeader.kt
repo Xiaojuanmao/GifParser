@@ -1,5 +1,6 @@
 package nomore.delay.gifparser.model
 
+import nomore.delay.gifparser.toStrings
 import java.util.*
 
 class GifHeader {
@@ -8,8 +9,8 @@ class GifHeader {
 
     override fun toString(): String {
         return "\nGifHeader(" +
-                "signature=${Arrays.toString(signature)}," +
-                "version=${Arrays.toString(version)}" +
+                "signature=${signature.toStrings()}," +
+                "version=${version.toStrings()}" +
                 ")\n"
     }
 

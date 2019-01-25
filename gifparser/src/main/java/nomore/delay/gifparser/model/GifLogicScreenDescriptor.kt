@@ -5,8 +5,8 @@ import java.util.*
 
 class GifLogicScreenDescriptor {
 
-    var widthInPx: Short = 0 // 逻辑屏幕宽 16 bit
-    var heightInPx: Short = 0 // 逻辑屏幕高 16 bit
+    var widthInPx: Int = 0 // 逻辑屏幕宽 16 bit
+    var heightInPx: Int = 0 // 逻辑屏幕高 16 bit
     var hasGlobalColorTable: Boolean = false // 是否有全局颜色表 1 bit
     var colorResolution: Int = 0 // 色彩解析度 3 bit
     var sortFlag: Boolean = false // 全局颜色表是否按序排列 1 bit
