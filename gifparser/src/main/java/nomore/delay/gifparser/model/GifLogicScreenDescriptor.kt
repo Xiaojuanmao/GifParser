@@ -1,6 +1,5 @@
 package nomore.delay.gifparser.model
 
-import nomore.delay.gifparser.toHexString
 import java.util.*
 
 class GifLogicScreenDescriptor {
@@ -11,8 +10,8 @@ class GifLogicScreenDescriptor {
     var colorResolution: Int = 0 // 色彩解析度 3 bit
     var sortFlag: Boolean = false // 全局颜色表是否按序排列 1 bit
     var globalColorTableSizeInByte: Int = 0 // 全局颜色表的大小 3 bit
-    var backgroundColorIndex: Byte = 0 // 背景色在全局颜色表的索引 8 bit
-    var pixelAspectRatio: Byte = 0 // 用于计算原始图像中像素的宽高比的近似值 8 bit
+    var backgroundColorIndex: Int= 0 // 背景色在全局颜色表的索引 8 bit
+    var pixelAspectRatio: Int = 0 // 用于计算原始图像中像素的宽高比的近似值 8 bit
 
     var globalColorTable: ByteArray? = null // 整个全局颜色表，大小为3的整数倍，RGB排列
 

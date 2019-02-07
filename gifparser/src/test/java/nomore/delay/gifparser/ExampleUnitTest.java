@@ -20,7 +20,8 @@ public class ExampleUnitTest {
     @Test
     public void testGifHeader() {
         GifParser gifParser = new GifParser();
-        gifParser.init("src/test/java/nomore/delay/gifparser/demo_gif.gif");
+        gifParser.init("src/test/java/nomore/delay/gifparser/able_1.gif");
         gifParser.parse();
+
     }
 }

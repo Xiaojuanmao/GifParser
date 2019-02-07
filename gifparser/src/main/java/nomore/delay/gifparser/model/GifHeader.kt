@@ -1,7 +1,6 @@
 package nomore.delay.gifparser.model
 
 import nomore.delay.gifparser.toStrings
-import java.util.*
 
 class GifHeader {
     var signature: ByteArray = ByteArray(3) // magic number

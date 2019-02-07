@@ -1,11 +1,10 @@
 package nomore.delay.gifparser.model
 
 import nomore.delay.gifparser.nullOr
-import java.util.*
 
 class GifFrame {
 
-    var frameSeparator: Int= 0x2C // 图像标识符以',' 值为0x2C 开头 8 bit
+    var frameSeparator: Int = 0x2C // 图像标识符以',' 值为0x2C 开头 8 bit
     var translationX: Int = 0 // X方向偏移量 16 bit
     var translationY: Int = 0 // Y方向偏移量 16 bit
     var frameWidth: Int = 0 // 帧宽 16 bit
@@ -19,7 +18,7 @@ class GifFrame {
 
     var localColorTable: ByteArray? = null // 局部颜色表，大小为3的整数倍，RGB排列
 
-    var lzwInitSize: Byte = 0 // 图像数据中的LZW码的初始字节数
+    var lzwInitSize: Int = 0 // 图像数据中的LZW码的初始字节数
     var dataBlocks: List<DataBlock>? = null // 图像数据
 
     var blockTerminator: Byte = 0 // block结束符
@@ -36,7 +35,6 @@ class GifFrame {
                 "sortFlag=$sortFlag," +
                 "preserved=$preserved," +
                 "localColorTableSize=$localColorTableSize," +
-                "localColorTable=${Arrays.toString(localColorTable)}," +
                 "lzwInitSize=$lzwInitSize," +
                 "dataBlocksSize=${dataBlocks?.size.nullOr(0)}," +
                 "blockTerminator=$blockTerminator" +

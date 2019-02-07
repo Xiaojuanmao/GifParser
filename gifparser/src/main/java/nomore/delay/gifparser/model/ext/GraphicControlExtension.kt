@@ -10,7 +10,7 @@ package nomore.delay.gifparser.model.ext
  */
 class GraphicControlExtension : ExtensionBlock() {
 
-    var blockSize: Byte = 4 // 块大小，固定值4 8 bit
+    var blockSize: Int = 4 // 块大小，固定值4 8 bit
 
     var reservedFlag: Int = 0 // 保留位，3 bit
     /**

@@ -98,38 +98,33 @@ class GifParser {
         lsd.widthInPx = readShort()
         lsd.heightInPx = readShort()
 
-        val multiParams = rawData?.get()?.toInt()
-        lsd.hasGlobalColorTable = multiParams?.and(MASK_GLOBAL_COLOR_TABLE) == 1
-        lsd.colorResolution = multiParams?.and(MASK_COLOR_RESOLUTION).nullOr(0)
-        lsd.sortFlag = multiParams?.and(MASK_GLOBAL_COLOR_TABLE_SORT).nullOr(0) == 1
-        lsd.globalColorTableSizeInByte = multiParams?.and(MASK_GLOBAL_COLOR_TABLE_SIZE).nullOr(0)
-
-        lsd.backgroundColorIndex = if (lsd.hasGlobalColorTable) {
-            rawData?.get().nullOr(-1)
-        } else {
-            0
-        }
-        lsd.pixelAspectRatio = rawData?.get().nullOr(-1)
+        val multiParams = readByte()
+        lsd.hasGlobalColorTable = multiParams.and(MASK_GLOBAL_COLOR_TABLE) != 0
+        lsd.colorResolution = multiParams.and(MASK_COLOR_RESOLUTION).nullOr(0)
+        lsd.sortFlag = multiParams.and(MASK_GLOBAL_COLOR_TABLE_SORT).nullOr(0) != 0
+        val sizeInByte = multiParams.and(MASK_GLOBAL_COLOR_TABLE_SIZE).nullOr(0)
+        lsd.globalColorTableSizeInByte = calculateColorSize(sizeInByte)
+        lsd.backgroundColorIndex = readByte()
+        lsd.pixelAspectRatio = readByte()
         /**
          * 获取全局颜色表
          * 3*2^(Size of Global Color Table+1)
          */
         if (lsd.hasGlobalColorTable) {
-            val tableSize = (3 * (lsd.globalColorTableSizeInByte + 1).toFloat().pow(2)).toInt()
-            lsd.globalColorTable = ByteArray(tableSize)
-            rawData?.get(lsd.globalColorTable)
+            lsd.globalColorTable = readColorTable(lsd.globalColorTableSizeInByte)
         }
-
         print(lsd.toString())
     }
 
     private fun parseContents() {
-        var done = false
-        while (!done) {
-            val next: Int? = rawData?.get()?.toInt()
+        while (true) {
+            if (!rawData?.hasRemaining().nullOr(false)) {
+                break
+            }
+            val next = readByte()
             when (next) {
                 LABEL_EXT_START -> {
-                    val extLabel: Int? = rawData?.get()?.toInt()
+                    val extLabel: Int? = readByte()
                     when (extLabel) {
 
                         LABEL_EXT_GRAPHIC_CONTROL -> {
@@ -149,7 +144,7 @@ class GifParser {
                         }
 
                         else -> {
-//                            print("\nskip unknown extension")
+                            skip()
                         }
                     }
                 }
@@ -159,11 +154,8 @@ class GifParser {
                 }
 
                 LABEL_TRAILER -> {
-                    print("\nfile trailer")
-                    done = true
                 }
                 LABEL_EMPTY -> {
-//                    print("\nempty label")
                 }
                 else -> {
                 }
@@ -173,15 +165,15 @@ class GifParser {
 
     private fun parseGraphicControlExt() {
         val graphicControlExtension = GraphicControlExtension()
-        graphicControlExtension.blockSize = rawData?.get().nullOr(0)
+        graphicControlExtension.blockSize = readByte()
 
-        val multiParams = rawData?.get()?.toInt()
-        graphicControlExtension.reservedFlag = multiParams?.and(MASK_GRAPHIC_CONTROL_RESERVED_FLAG).nullOr(0)
-        graphicControlExtension.disposalMethod = multiParams?.and(MASK_GRAPHIC_CONTROL_DISPOSABLE_METHOD).nullOr(0)
-        graphicControlExtension.userInputFlag = multiParams?.and(MASK_GRAPHIC_CONTROL_USER_INPUT) == 1
-        graphicControlExtension.transparentFlag = multiParams?.and(MASK_GRAPHIC_CONTROL_TRANSPARENT) == 1
+        val multiParams = readByte()
+        graphicControlExtension.reservedFlag = multiParams.and(MASK_GRAPHIC_CONTROL_RESERVED_FLAG).nullOr(0)
+        graphicControlExtension.disposalMethod = multiParams.and(MASK_GRAPHIC_CONTROL_DISPOSABLE_METHOD).nullOr(0)
+        graphicControlExtension.userInputFlag = multiParams.and(MASK_GRAPHIC_CONTROL_USER_INPUT) != 0
+        graphicControlExtension.transparentFlag = multiParams.and(MASK_GRAPHIC_CONTROL_TRANSPARENT) != 0
 
-        graphicControlExtension.delayTime = rawData?.short?.toInt().nullOr(0)
+        graphicControlExtension.delayTime = readShort()
         graphicControlExtension.transparentColorIndex = readByte()
 
         graphicControlExtension.blockTerminator = readByte()
@@ -191,23 +183,10 @@ class GifParser {
 
     private fun parseApplicationExt() {
         val applicationExt = ApplicationExtension()
-        applicationExt.blockSize = rawData?.get().nullOr(-1)
+        applicationExt.blockSize = readByte()
         rawData?.get(applicationExt.identifier)
         rawData?.get(applicationExt.authenticationCode)
-
-        // 获取计算出的二进制标识，知道ext结束
-        val buffer = ByteBuffer.allocate(1)
-        while (true) {
-            val currentByte = rawData?.get()
-            if (currentByte == null || currentByte.toInt() == 0) {
-                // ext结束
-                applicationExt.blockTerminator = 0
-                break
-            } else {
-                buffer.put(currentByte)
-            }
-        }
-        applicationExt.identifierCode = buffer.array()
+        applicationExt.applicationBlocks = readDataBlocks()
 
         print(applicationExt.toString())
     }
@@ -226,20 +205,22 @@ class GifParser {
         gifFrame.frameWidth = readShort()
         gifFrame.frameHeight = readShort()
 
-        val multiParams = rawData?.get()?.toInt()
-        gifFrame.hasLocalColorTable = multiParams?.and(MASK_GIF_FRAME_HAS_LOCAL_COLOR_TABLE) == 1
-        gifFrame.interfaceFlag = multiParams?.and(MASK_GIF_FRAME_INTERFACE_FLAG) == 1
-        gifFrame.sortFlag = multiParams?.and(MASK_GIF_FRAME_LOCAL_COLOR_TABLE_SORT_FLAG) == 1
-        gifFrame.preserved = multiParams?.and(MASK_GIF_FRAME_PERSERVED) == 1
-        gifFrame.localColorTableSize = multiParams?.and(MASK_GIF_FRAME_LOCAL_COLOR_TABLE_SIZE).nullOr(0)
+        val multiParams = readByte()
+        gifFrame.hasLocalColorTable = multiParams.and(MASK_GIF_FRAME_HAS_LOCAL_COLOR_TABLE) != 0
+        gifFrame.interfaceFlag = multiParams.and(MASK_GIF_FRAME_INTERFACE_FLAG) != 0
+        gifFrame.sortFlag = multiParams.and(MASK_GIF_FRAME_LOCAL_COLOR_TABLE_SORT_FLAG) != 0
+        gifFrame.preserved = multiParams.and(MASK_GIF_FRAME_PERSERVED) != 0
 
+        val sizeInByte = multiParams.and(MASK_GIF_FRAME_LOCAL_COLOR_TABLE_SIZE).nullOr(0)
+        gifFrame.localColorTableSize = calculateColorSize(sizeInByte)
         // local color table
         if (gifFrame.hasLocalColorTable) {
-            val tableSize = (3 * (gifFrame.localColorTableSize + 1).toFloat().pow(2)).toInt()
-            gifFrame.localColorTable = ByteArray(tableSize)
-            rawData?.get(gifFrame.localColorTable)
+            gifFrame.localColorTable = readColorTable(gifFrame.localColorTableSize)
+        } else {
+            gifFrame.localColorTable = null
         }
-        gifFrame.lzwInitSize = rawData?.get().nullOr(0)
+
+        gifFrame.lzwInitSize = readByte()
         gifFrame.dataBlocks = readDataBlocks()
 
         print(gifFrame)
@@ -256,24 +237,38 @@ class GifParser {
         plainTextExtension.characterHeight = readByte()
         plainTextExtension.textForegroundColorIndex = readByte()
         plainTextExtension.textBackgroundColorIndex = readByte()
-
         plainTextExtension.textBlocks = readDataBlocks()
 
         print(plainTextExtension)
 
     }
 
+    private fun calculateColorSize(size: Int): Int {
+        return if (size > 0) {
+            ((size + 1).toFloat().pow(2)).toInt()
+        } else {
+            0
+        }
+    }
+
+    private fun readColorTable(tableSize: Int): ByteArray? {
+        val colorTable = ByteArray(3 * tableSize)
+        print("color table size : $tableSize")
+        rawData?.get(colorTable)
+        return colorTable
+    }
+
     private fun readDataBlocks(): List<DataBlock>? {
         val frameBlockList = mutableListOf<DataBlock>()
         while (true) {
-            val blockSize = rawData?.get()
-            if (blockSize == null || blockSize.toInt() == 0) {
+            val blockSize = readByte()
+            if (blockSize <= 0) {
                 // ext结束
                 break
             } else {
                 // read one frame data block
                 val dataBlock = DataBlock()
-                dataBlock.blockSize = byteToInt(blockSize)
+                dataBlock.blockSize = blockSize
                 val byteArray = ByteArray(dataBlock.blockSize)
                 rawData?.get(byteArray)
                 dataBlock.datas = byteArray
@@ -307,7 +302,10 @@ class GifParser {
         var blockSize: Int
         do {
             blockSize = readByte()
-            val newPosition = Math.min(rawData?.position().nullOr(0) + blockSize, rawData?.limit().nullOr(0))
+            val newPosition = Math.min(
+                rawData?.position().nullOr(0) + blockSize,
+                rawData?.limit().nullOr(0)
+            )
             rawData?.position(newPosition)
         } while (blockSize > 0)
     }
